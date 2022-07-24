@@ -8,5 +8,5 @@ const loneRangerQuotes = [
 ];
 
 export async function helloWorld() {
-  flashNotification(loneRangerQuotes[Math.floor(Math.random() * loneRangerQuotes.length)]);
+  await flashNotification(loneRangerQuotes[Math.floor(Math.random() * loneRangerQuotes.length)]);
 }
