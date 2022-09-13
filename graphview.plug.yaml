@@ -1,0 +1,7 @@
+name: graphview
+version: 0.1
+functions:
+  helloWorld:
+    # path: "./graphview.ts:graphView"
+    command:
+      name: "Show Graph"

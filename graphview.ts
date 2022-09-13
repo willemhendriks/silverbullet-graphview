@@ -7,6 +7,6 @@ const loneRangerQuotes = [
   "Get-um up, Scout!",
 ];
 
-export async function helloWorld() {
+export async function graphView() {
   await flashNotification(loneRangerQuotes[Math.floor(Math.random() * loneRangerQuotes.length)]);
 }
