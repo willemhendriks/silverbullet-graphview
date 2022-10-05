@@ -2,6 +2,6 @@ name: graphview
 version: 0.1
 functions:
   helloWorld:
-    # path: "./graphview.ts:graphView"
+    path: "./graphview.ts:toggleGraphView"
     command:
       name: "Show Graph"
