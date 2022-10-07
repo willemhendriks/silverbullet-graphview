@@ -74,6 +74,14 @@ function ForceGraph({
     .data(links)
     .join("line");
 
+  const zoomRect = svg.append("rect")
+    .attr("width", "100%")
+    .attr("height", "100%")
+    .attr("x", -width / 2)
+    .attr("y", -height / 2)
+    .style("fill", "none")
+    .style("pointer-events", "all");
+
   if (W) link.attr("stroke-width", ({index: i}) => W[i]);
 
   const node = svg.append("g")
@@ -108,7 +116,21 @@ function ForceGraph({
       .attr("cx", d => d.x)
       .attr("cy", d => d.y);
   }
+ 
+  // Zoom
+  function zoomed(event) {
+    node.attr("transform", event.transform);
+    link.attr("transform", event.transform);
+  }
 
+  const zoom = d3.zoom()
+    .scaleExtent([1/2, 64])
+    .on("zoom", zoomed);
+  
+  zoomRect.call(zoom)
+    .call(zoom.translateTo, 0, 0);
+
+  // Drag
   function drag(simulation) {    
     function dragstarted(event) {
       if (!event.active) simulation.alphaTarget(0.3).restart();
