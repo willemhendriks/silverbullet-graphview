@@ -52,24 +52,17 @@ function ForceGraph({
   if (nodeStrength !== undefined) forceNode.strength(nodeStrength);
   if (linkStrength !== undefined) forceLink.strength(linkStrength);
 
-  const simulation = d3.forceSimulation(nodes)
-      .force("link", forceLink)
-      .force("charge", forceNode)
-      .force("x", d3.forceX())
-      .force("y", d3.forceY())
-      .on("tick", ticked);
-
   const svg = d3.create("svg")
-      .attr("width", width)
-      .attr("height", height)
-      .attr("viewBox", [-width / 2, -height / 2, width, height])
-      .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+    .attr("width", width)
+    .attr("height", height)
+    .attr("viewBox", [-width / 2, -height / 2, width, height])
+    .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
 
   const link = svg.append("g")
-      .attr("stroke", linkStroke)
-      .attr("stroke-opacity", linkStrokeOpacity)
-      .attr("stroke-width", typeof linkStrokeWidth !== "function" ? linkStrokeWidth : null)
-      .attr("stroke-linecap", linkStrokeLinecap)
+    .attr("stroke", linkStroke)
+    .attr("stroke-opacity", linkStrokeOpacity)
+    .attr("stroke-width", typeof linkStrokeWidth !== "function" ? linkStrokeWidth : null)
+    .attr("stroke-linecap", linkStrokeLinecap)
     .selectAll("line")
     .data(links)
     .join("line");
@@ -77,15 +70,14 @@ function ForceGraph({
   if (W) link.attr("stroke-width", ({index: i}) => W[i]);
 
   const node = svg.append("g")
-      .attr("fill", nodeFill)
-      .attr("stroke", nodeStroke)
-      .attr("stroke-opacity", nodeStrokeOpacity)
-      .attr("stroke-width", nodeStrokeWidth)
+    .attr("fill", nodeFill)
+    .attr("stroke", nodeStroke)
+    .attr("stroke-opacity", nodeStrokeOpacity)
+    .attr("stroke-width", nodeStrokeWidth)
     .selectAll("circle")
     .data(nodes)
     .join("circle")
-      .attr("r", nodeRadius)
-      .call(drag(simulation));
+    .attr("r", nodeRadius);
 
   if (G) node.attr("fill", ({index: i}) => color(G[i]));
   if (T) node.append("title").text(({index: i}) => T[i]);
@@ -96,6 +88,13 @@ function ForceGraph({
   function intern(value) {
     return value !== null && typeof value === "object" ? value.valueOf() : value;
   }
+
+  const simulation = d3.forceSimulation(nodes)
+      .force("link", forceLink)
+      .force("charge", forceNode)
+      .force("x", d3.forceX())
+      .force("y", d3.forceY())
+      .on("tick", ticked);
 
   function ticked() {
     link
@@ -111,14 +110,18 @@ function ForceGraph({
  
   // Zoom
   function zoomed(event) {
+    const t = event.transform;
+    const translate = "translate(" + t.x + "," + t.y + ")"
     node
-      .attr("cx", d => d.x * event.transform.k)
-      .attr("cy", d => d.y * event.transform.k);
+      .attr("cx", d => d.x * t.k)
+      .attr("cy", d => d.y * t.k)
+      .attr('transform', translate);
     link
-      .attr("x1", d => d.source.x * event.transform.k)
-      .attr("y1", d => d.source.y * event.transform.k)
-      .attr("x2", d => d.target.x * event.transform.k)
-      .attr("y2", d => d.target.y * event.transform.k);
+      .attr("x1", d => d.source.x * t.k)
+      .attr("y1", d => d.source.y * t.k)
+      .attr("x2", d => d.target.x * t.k)
+      .attr("y2", d => d.target.y * t.k)
+      .attr('transform', translate);;
   }
 
   const zoom = d3.zoom()
@@ -128,30 +131,6 @@ function ForceGraph({
   svg.call(zoom)
     .call(zoom.translateTo, 0, 0);
 
-  // Drag
-  function drag(simulation) {    
-    function dragstarted(event) {
-      if (!event.active) simulation.alphaTarget(0.3).restart();
-      event.subject.fx = event.subject.x;
-      event.subject.fy = event.subject.y;
-    }
-    
-    function dragged(event) {
-      event.subject.fx = event.x;
-      event.subject.fy = event.y;
-    }
-    
-    function dragended(event) {
-      if (!event.active) simulation.alphaTarget(0);
-      event.subject.fx = null;
-      event.subject.fy = null;
-    }
-    
-    return d3.drag()
-      .on("start", dragstarted)
-      .on("drag", dragged)
-      .on("end", dragended);
-  }
 
   return Object.assign(svg.node(), {scales: {color}});
 }
