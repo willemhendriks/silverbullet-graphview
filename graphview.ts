@@ -38,6 +38,7 @@ function script(graph) {
     const chart = ForceGraph(graph, {
       nodeId: d => d.id,
       nodeTitle: d => d.id,
+      nodeRadius: 8,
       height: 600,
       width: 600,
     });
