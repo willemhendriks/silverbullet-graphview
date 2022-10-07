@@ -1,5 +1,6 @@
 import * as clientStore from "@silverbulletmd/plugos-silverbullet-syscall/clientStore";
 import {getCurrentPage, hideLhs, showLhs} from "@silverbulletmd/plugos-silverbullet-syscall/editor";
+import { listPages } from "@silverbulletmd/plugos-silverbullet-syscall/space";
 import { queryPrefix } from "@silverbulletmd/plugos-silverbullet-syscall";
 
 // @ts-ignore
@@ -18,7 +19,7 @@ export async function toggleGraphView() {
     const name = await getCurrentPage(); 
     await renderGraph(name);
   } else {
-    await hideLhs()
+    await hideLhs();
   }
 }
 
@@ -34,7 +35,7 @@ function script(graph) {
     ${d3forcegraph}
     
     const graph = ${graph};
-
+    console.log(graph);
     const chart = ForceGraph(graph, {
       nodeId: d => d.id,
       nodeTitle: d => d.id,
@@ -70,25 +71,25 @@ async function renderGraph(page) {
 }
 
 async function buildGraph(name) {
-  const allLinks = await queryPrefix(`pl:`);
-  // FIXME: This has one remaining issues:
-  // 1. Doesn't create nodes for pages without inlinks and outlinks
-  const network = allLinks.reduce( (acumulator, {key, page}) => {
+  const pages = await listPages();
+  const nodeNames = pages.map(({name}) => { return name; });
+
+  // NOTE: This may result to the same link showing multiple times
+  //       if the same page has multiple references to another page.
+  const pageLinks = await queryPrefix(`pl:`);
+  const links =  pageLinks.map(({key, page}) => { 
     const [,to, ] = key.split(':'); // Key: pl:page:pos
-    let outlinks = acumulator.get(page) || [];
-    if (!outlinks.includes(to)) outlinks.push(to); // I tried Set<String> ... quite hard.
-    if (!acumulator.has(to)) acumulator.set(to, []); // Make sure we add a node for pages with only inlinks
-    return acumulator.set(page, outlinks);
-  }, new Map<String, Array<String>>())
+    
+    if (!nodeNames.includes(to)) {
+      // Add nodes for non-existing pages which are linked to
+      nodeNames.push(to);
+    }
+    return { "source": page, "target": to };
+  });
 
-
-  let nodes = [];
-  let links = [];
-  for (let key of network.keys()) {
-    if (key === name) nodes.push({ "id": key, "selected": true });
-    else nodes.push({ "id": key });
-    (network.get(key) || []).forEach( (e) => { links.push({ "source": key, "target": e }); })
-  }
+  const nodes = nodeNames.map((name) => {
+    return {"id":name}
+  });
 
   return { "nodes": nodes, "links": links };
 }
