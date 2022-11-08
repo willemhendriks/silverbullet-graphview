@@ -79,6 +79,12 @@ function ForceGraph({
     .join("circle")
     .attr("r", nodeRadius);
 
+  const labels = svg.append("g")
+    .selectAll("text")
+    .data(nodes)
+    .join('text')
+    .text(d => d.id);
+
   if (G) node.attr("fill", ({index: i}) => color(G[i]));
   if (T) node.append("title").text(({index: i}) => T[i]);
 
@@ -106,15 +112,22 @@ function ForceGraph({
     node
       .attr("cx", d => d.x)
       .attr("cy", d => d.y);
+
+    labels
+      .attr('x', d => d.x)
+      .attr('y', d => d.y);
   }
  
   // Zoom
   function zoomed(event) {
     const t = event.transform;
+    // console.log(event);
+    console.log(event.transform.k);
     const translate = "translate(" + t.x + "," + t.y + ")"
     node
       .attr("cx", d => d.x * t.k)
       .attr("cy", d => d.y * t.k)
+      .attr("title", { x: 2, y: 2, text: "hi"} )
       .attr('transform', translate);
     link
       .attr("x1", d => d.source.x * t.k)
@@ -122,6 +135,21 @@ function ForceGraph({
       .attr("x2", d => d.target.x * t.k)
       .attr("y2", d => d.target.y * t.k)
       .attr('transform', translate);;
+    labels
+      .attr('transform', translate)
+      .attr('x', d => d.x * t.k)
+      .attr('y', d => d.y * t.k);
+
+      if( event.transform.k > 5 ){
+        console.log("You can only see me when zommed in!");
+        node
+        .attr("text", 'lorem ipsum')
+        .attr("fill", '#00ff33');;
+      }
+      else{
+        node
+        .attr("fill", '#111');;
+      }
   }
 
   const zoom = d3.zoom()
