@@ -1,0 +1,105 @@
+<html>
+
+<head>
+    <script src="asset/d3.js"></script>
+    <script src="asset/d3-force.js"></script>
+    <script src="asset/force-graph.js"></script>
+
+</head>
+
+<body>
+    <div id="graph">
+    </div>
+
+    <script>
+        const graph = {
+            "nodes": [
+                {
+                    "id": "SETTINGS"
+                },
+                {
+                    "id": "index"
+                },
+                {
+                    "id": "Resources/Organisations/BigData Republic"
+                },
+                {
+                    "id": "Resources/People/Piet"
+                },
+                {
+                    "id": "Resources/People/Jan"
+                },
+                {
+                    "id": "Resources/Organisations/Vantage AI"
+                },
+                {
+                    "id": "Resource/People/Klaas"
+                },
+                {
+                    "id": "PLUGS"
+                },
+                {
+                    "id": "Resource/People/Willem"
+                },
+                {
+                    "id": "Re"
+                }
+            ],
+            "links": [
+                {
+                    "source": "Resources/Organisations/BigData Republic",
+                    "target": "Re"
+                },
+                {
+                    "source": "index",
+                    "target": "Resource/People/Klaas"
+                },
+                {
+                    "source": "index",
+                    "target": "Resource/People/Willem"
+                },
+                {
+                    "source": "Resources/People/Jan",
+                    "target": "Resources/Organisations/BigData Republic"
+                },
+                {
+                    "source": "Resources/People/Piet",
+                    "target": "Resources/Organisations/BigData Republic"
+                },
+                {
+                    "source": "index",
+                    "target": "Resources/Organisations/BigData Republic"
+                },
+                {
+                    "source": "Resource/People/Klaas",
+                    "target": "Resources/Organisations/Vantage AI"
+                },
+                {
+                    "source": "index",
+                    "target": "Resources/Organisations/Vantage AI"
+                },
+                {
+                    "source": "index",
+                    "target": "Resources/People/Jan"
+                },
+                {
+                    "source": "index",
+                    "target": "Resources/People/Piet"
+                }
+            ]
+        };
+        console.log(graph);
+        const chart = ForceGraph(graph, {
+            nodeId: d => d.id,
+            nodeTitle: d => d.id,
+            nodeRadius: 10,
+            nodeStrokeOpacity: 0.75,
+            height: 600,
+            width: 700,
+        });
+        const graph_div = document.querySelector('#graph');
+        graph_div.appendChild(chart);
+    </script>
+</body>
+
+</html>
