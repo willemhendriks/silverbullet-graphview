@@ -109,12 +109,19 @@ function ForceGraph({
   }
  
   // Zoom
+  function resizeNode(d, k) {
+    // TODO: Make sure d has some information on the connectedness of a
+    // node so that we can vary node sizes based on that.
+    return Math.max(5, 5 * Math.log(k));
+  }
+
   function zoomed(event) {
     const t = event.transform;
     const translate = "translate(" + t.x + "," + t.y + ")"
     node
       .attr("cx", d => d.x * t.k)
       .attr("cy", d => d.y * t.k)
+      .attr("r", d => resizeNode(d, t.k))
       .attr('transform', translate);
     link
       .attr("x1", d => d.source.x * t.k)
