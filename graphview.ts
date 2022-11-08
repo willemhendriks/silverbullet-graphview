@@ -19,6 +19,12 @@ export async function toggleGraphView() {
   }
 }
 
+// if something changes, redraw
+export async function updateGraphView() {
+  const name = await editor.getCurrentPage();
+  await renderGraph(name);
+}
+
 // Use store to figure out if backlinks are open or closed.
 async function getGraphViewStatus(): Promise<boolean> {
   return !!(await clientStore.get(GraphViewKey));
@@ -31,6 +37,8 @@ async function script(graph: any) {
     "asset/force-graph.js",
     "utf8",
   );
+  // TODO: Get current height and width
+  
   return `
     ${d3js}
     ${d3forcejs}
@@ -42,8 +50,9 @@ async function script(graph: any) {
       nodeId: d => d.id,
       nodeTitle: d => d.id,
       nodeRadius: 10,
+      nodeStrokeOpacity: 0.75,
       height: 600,
-      width: 600,
+      width: 700,
     });
     const graph_div = document.querySelector('#graph');
     graph_div.appendChild(chart);
@@ -63,7 +72,6 @@ async function renderGraph(page: any) {
         <head>
         </head>
         <body>
-          <h2>Document Graph</h2>
           <div id="graph" >
           </div>
         </body>

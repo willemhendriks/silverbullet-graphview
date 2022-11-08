@@ -5,7 +5,17 @@ version: 0.1
 assets:
   - "asset/*"
 functions:
-  helloWorld:
+
+  toggle:
     path: "./graphview.ts:toggleGraphView"
     command:
-      name: "Show Graph"
+      name: "Show Global Graph"
+      key: ctrl-shift-g
+      mac: Cmd-shift-g
+
+  updateBacklinks:
+    path: "./graphview.ts:updateGraphView"
+    env: client
+    events:
+      - plug:load
+      - editor:pageLoaded
