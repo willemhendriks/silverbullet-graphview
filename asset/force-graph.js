@@ -28,6 +28,7 @@ function ForceGraph({
   invalidation // when this promise resolves, stop the simulation
 } = {}) {
   // Compute values.
+
   const N = d3.map(nodes, nodeId).map(intern);
   const LS = d3.map(links, linkSource).map(intern);
   const LT = d3.map(links, linkTarget).map(intern);
@@ -83,7 +84,8 @@ function ForceGraph({
     .selectAll("text")
     .data(nodes)
     .join('text')
-    .text(d => d.id);
+    .text(d => d.id)
+    .attr('text-anchor', 'middle');
 
   if (G) node.attr("fill", ({index: i}) => color(G[i]));
   if (T) node.append("title").text(({index: i}) => T[i]);
@@ -134,16 +136,16 @@ function ForceGraph({
       .attr("y1", d => d.source.y * t.k)
       .attr("x2", d => d.target.x * t.k)
       .attr("y2", d => d.target.y * t.k)
-      .attr('transform', translate);;
+      .attr('transform', translate);
     labels
       .attr('transform', translate)
-      .attr('x', d => d.x * t.k)
-      .attr('y', d => d.y * t.k);
+      .attr('x', d => d.x * t.k )
+      .attr('y', d => d.y * t.k + 20 )
+      .attr('opacity', opacity_activation(event.transform.k) );;
 
       if( event.transform.k > 5 ){
         console.log("You can only see me when zommed in!");
         node
-        .attr("text", 'lorem ipsum')
         .attr("fill", '#00ff33');;
       }
       else{
@@ -161,4 +163,24 @@ function ForceGraph({
 
 
   return Object.assign(svg.node(), {scales: {color}});
+}
+
+
+
+
+
+
+function opacity_activation(zoom_level){
+  var still_invisible_k = 2;
+  var fully_visible_k = 4;
+
+  if (zoom_level <=  still_invisible_k) {
+    return 0;
+  }
+  if (zoom_level >=  fully_visible_k) {
+    return 1;
+  }
+  var linear_opacity = (zoom_level - still_invisible_k) / (fully_visible_k);
+
+  return linear_opacity;
 }
