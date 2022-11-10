@@ -199,7 +199,7 @@ function opacity_activation(zoom_level){
     return 1;
   }
 
-  var linear_opacity = (zoom_level - LABEL_VISIBILITY_START_K) / (LABEL_VISIBILITY_END_K);
+  var linear_opacity = (zoom_level - LABEL_VISIBILITY_START_K) / (LABEL_VISIBILITY_END_K - LABEL_VISIBILITY_START_K);
 
   return linear_opacity;
 }
