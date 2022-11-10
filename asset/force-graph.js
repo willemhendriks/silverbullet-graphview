@@ -37,6 +37,20 @@ function ForceGraph({
   const G = nodeGroup == null ? null : d3.map(nodes, nodeGroup).map(intern);
   const W = typeof linkStrokeWidth !== "function" ? null : d3.map(links, linkStrokeWidth);
 
+
+  //
+  // Settings added by WSIMULATION_illem Hendriks
+  // (!) to be added to yaml or other settings config
+  //
+  //
+  // LABEL SETTINGS
+  const LABEL_MARGIN = 22; // margin between label-text and node, higher number -> more space
+  // VELOCITY SIMULATION SETTINGS (D3 Force Algorithm)
+  const D3_FORCE_SIMULATION_ALPHA = 0.8 // https://github.com/d3/d3-force#simulation_alpha
+  const D3_FORCE_SIMULATION_ALPHA_DECAY = 0.2 // https://github.com/d3/d3-force#simulation_alphaDecay
+  const D3_FORCE_SIMULATION_ALPHA_MIN = 0.3 // https://github.com/d3/d3-force#simulation_alphaMin
+
+
   // Replace the input nodes and links with mutable objects for the simulation.
   nodes = d3.map(nodes, (_, i) => ({id: N[i]}));
   links = d3.map(links, (_, i) => ({source: LS[i], target: LT[i]}));
@@ -71,13 +85,13 @@ function ForceGraph({
   if (W) link.attr("stroke-width", ({index: i}) => W[i]);
 
   const node = svg.append("g")
-    .attr("fill", nodeFill)
     .attr("stroke", nodeStroke)
     .attr("stroke-opacity", nodeStrokeOpacity)
     .attr("stroke-width", nodeStrokeWidth)
     .selectAll("circle")
     .data(nodes)
     .join("circle")
+    .attr("fill", d => group_name_to_color(d.id) ) // basic string-based color mapper
     .attr("r", nodeRadius);
 
   const labels = svg.append("g")
@@ -85,6 +99,9 @@ function ForceGraph({
     .data(nodes)
     .join('text')
     .text(d => d.id)
+    .attr('font-family', 'Sans,Arial' )
+    .attr('font-size', '0.8em' )
+    .attr('fill', '#222' )
     .attr('text-anchor', 'middle');
 
   if (G) node.attr("fill", ({index: i}) => color(G[i]));
@@ -102,6 +119,9 @@ function ForceGraph({
       .force("charge", forceNode)
       .force("x", d3.forceX())
       .force("y", d3.forceY())
+      .alpha(D3_FORCE_SIMULATION_ALPHA)
+      .alphaDecay(D3_FORCE_SIMULATION_ALPHA_DECAY)
+      .alphaMin(D3_FORCE_SIMULATION_ALPHA_MIN)
       .on("tick", ticked);
 
   function ticked() {
@@ -140,18 +160,8 @@ function ForceGraph({
     labels
       .attr('transform', translate)
       .attr('x', d => d.x * t.k )
-      .attr('y', d => d.y * t.k + 20 )
+      .attr('y', d => d.y * t.k + LABEL_MARGIN )
       .attr('opacity', opacity_activation(event.transform.k) );;
-
-      if( event.transform.k > 5 ){
-        console.log("You can only see me when zommed in!");
-        node
-        .attr("fill", '#00ff33');;
-      }
-      else{
-        node
-        .attr("fill", '#111');;
-      }
   }
 
   const zoom = d3.zoom()
@@ -166,13 +176,21 @@ function ForceGraph({
 }
 
 
-
-
-
-
 function opacity_activation(zoom_level){
-  var still_invisible_k = 2;
-  var fully_visible_k = 4;
+  /* Summary: returns opacity value, depending on zoom level k
+   *
+   * opacity is a value betwen [0,1] where 0 is invisible
+   *
+   * Description: A linear opacity activation function.
+   * - for still_invisible_k (and below) -> 0 (invisible)
+   * - for fully_visible_k (and above) -> 1 (fully visible)
+   * - between: linear
+   *
+   *  activation function: _________/-------
+   *
+   */
+  var still_invisible_k = 1.5;
+  var fully_visible_k = 5;
 
   if (zoom_level <=  still_invisible_k) {
     return 0;
@@ -180,7 +198,56 @@ function opacity_activation(zoom_level){
   if (zoom_level >=  fully_visible_k) {
     return 1;
   }
+
   var linear_opacity = (zoom_level - still_invisible_k) / (fully_visible_k);
 
   return linear_opacity;
+}
+
+function group_name_to_color( full_group_name ){
+  return group_name_color_mapper( extract_group_name(full_group_name) );
+}
+
+function extract_group_name( full_group_name ){
+  /*
+   * Summary: Extract group name from a string.
+   * 
+   * Based on '/', where we limit the level to maximun 2 deep.
+   * Examples:
+   * 
+   * 'green' -> 'green'
+   * 'resource/people/joe' -> 'resource/people'
+   * 'resource/people/male/joe' -> 'resource/people' (!) MAX 2
+   * 'resource/people/male/maried/happy/has_kids/joe' -> 'resource/people'
+   * 'resource/volvo_v40' -> 'resource'
+   */
+
+    name_tokens = full_group_name.split('/')
+
+    if( name_tokens.length > 1 ){
+      console.log(name_tokens.slice(0, 2).join('/'));
+      return name_tokens.slice(0, 2).join('/');
+    }
+    else{
+      return name_tokens[0];
+    }
+}
+
+function group_name_color_mapper( group_name ){
+  /*
+   * Summary: Maps a groupname to a color
+   */
+
+    var static_color_map = {
+    "Resources/People" : "#f4e", 
+    "Resource/People" : "#f4e", 
+    "Resources/Organisations" : "#939", 
+    };
+
+    if (group_name in static_color_map){
+      return static_color_map[group_name]
+    }
+    else {
+      return '#222'
+    }
 }
