@@ -145,8 +145,6 @@ function ForceGraph({
   // Zoom
   function zoomed(event) {
     const t = event.transform;
-    // console.log(event);
-    console.log(event.transform.k);
     const translate = "translate(" + t.x + "," + t.y + ")"
     node
       .attr("cx", d => d.x * t.k)
@@ -225,7 +223,6 @@ function extract_group_name( full_group_name ){
     name_tokens = full_group_name.split('/')
 
     if( name_tokens.length > 1 ){
-      console.log(name_tokens.slice(0, 2).join('/'));
       return name_tokens.slice(0, 2).join('/');
     }
     else{
