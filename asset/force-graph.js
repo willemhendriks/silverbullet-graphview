@@ -1,3 +1,19 @@
+  //
+  // Settings added by Willem Hendriks
+  // (!) to be added to yaml or other settings config
+  //
+  //
+  // LABEL SETTINGS
+  const LABEL_MARGIN = 22; // margin between label-text and node, higher number -> more space
+  const LABEL_VISIBILITY_START_K = 1.5; // at this k, labels are still invisible
+  const LABEL_VISIBILITY_END_K = 5; // at this k, labels are fully visible
+  // VELOCITY SIMULATION SETTINGS (D3 Force Algorithm) - added to improve speed of annealing
+  const D3_FORCE_SIMULATION_ALPHA = 0.8 // https://github.com/d3/d3-force#simulation_alpha
+  const D3_FORCE_SIMULATION_ALPHA_DECAY = 0.2 // https://github.com/d3/d3-force#simulation_alphaDecay
+  const D3_FORCE_SIMULATION_ALPHA_MIN = 0.3 // https://github.com/d3/d3-force#simulation_alphaMin
+
+
+
 // Copyright 2021 Observable, Inc.
 // Released under the ISC license.
 // https://observablehq.com/@d3/disjoint-force-directed-graph
@@ -36,20 +52,6 @@ function ForceGraph({
   const T = nodeTitle == null ? null : d3.map(nodes, nodeTitle);
   const G = nodeGroup == null ? null : d3.map(nodes, nodeGroup).map(intern);
   const W = typeof linkStrokeWidth !== "function" ? null : d3.map(links, linkStrokeWidth);
-
-
-  //
-  // Settings added by WSIMULATION_illem Hendriks
-  // (!) to be added to yaml or other settings config
-  //
-  //
-  // LABEL SETTINGS
-  const LABEL_MARGIN = 22; // margin between label-text and node, higher number -> more space
-  // VELOCITY SIMULATION SETTINGS (D3 Force Algorithm)
-  const D3_FORCE_SIMULATION_ALPHA = 0.8 // https://github.com/d3/d3-force#simulation_alpha
-  const D3_FORCE_SIMULATION_ALPHA_DECAY = 0.2 // https://github.com/d3/d3-force#simulation_alphaDecay
-  const D3_FORCE_SIMULATION_ALPHA_MIN = 0.3 // https://github.com/d3/d3-force#simulation_alphaMin
-
 
   // Replace the input nodes and links with mutable objects for the simulation.
   nodes = d3.map(nodes, (_, i) => ({id: N[i]}));
@@ -182,24 +184,22 @@ function opacity_activation(zoom_level){
    * opacity is a value betwen [0,1] where 0 is invisible
    *
    * Description: A linear opacity activation function.
-   * - for still_invisible_k (and below) -> 0 (invisible)
-   * - for fully_visible_k (and above) -> 1 (fully visible)
+   * - for LABEL_VISIBILITY_START_K (and below) -> 0 (invisible)
+   * - for LABEL_VISIBILITY_END_K (and above) -> 1 (fully visible)
    * - between: linear
    *
-   *  activation function: _________/-------
+   *  ASCII are of activation function: ____/----
    *
    */
-  var still_invisible_k = 1.5;
-  var fully_visible_k = 5;
 
-  if (zoom_level <=  still_invisible_k) {
+  if (zoom_level <=  LABEL_VISIBILITY_START_K) {
     return 0;
   }
-  if (zoom_level >=  fully_visible_k) {
+  if (zoom_level >=  LABEL_VISIBILITY_END_K) {
     return 1;
   }
 
-  var linear_opacity = (zoom_level - still_invisible_k) / (fully_visible_k);
+  var linear_opacity = (zoom_level - LABEL_VISIBILITY_START_K) / (LABEL_VISIBILITY_END_K);
 
   return linear_opacity;
 }
